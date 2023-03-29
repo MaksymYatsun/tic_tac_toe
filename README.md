@@ -21,7 +21,6 @@
 
 ## Built With
 
-- Java Script
 - [node] version 12.29.9
 
 <!-- GETTING STARTED -->
