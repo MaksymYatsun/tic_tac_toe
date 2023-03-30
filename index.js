@@ -1,10 +1,5 @@
 const readline = require('readline');
 
-const rl = readline.createInterface({
-  input: process.stdin,
-  output: process.stdout
-});
-
 function ticTacToe() {
   const field = [null, null, null, null, null, null, null, null, null];
   let moveCounter = 0;
@@ -19,16 +14,17 @@ function ticTacToe() {
     }
   }
 
+  const isValidInput = (value) => {
+    return value < 0 || value > 8;
+  }
+
+  const emptySell = (value) => {
+    return field[value] !== null;
+  }
+
   const move = (value) => {
-    const validInput = (value) => {
-      return value < 0 || value > 8;
-    }
 
-    const emptySell = (value) => {
-      return field[value] !== null;
-    }
-
-    if (validInput(value)) {
+    if (isValidInput(value)) {
       throw new Error('Input must be between 1 and 9')
     }
 
@@ -36,10 +32,8 @@ function ticTacToe() {
       throw new Error('Sell is already occupied')
     }
 
-    if (!validInput(value) && !emptySell(value)) {
-      field[value] = getPlayer();
-      moveCounter += 1;
-    }
+    field[value] = getPlayer();
+    moveCounter += 1;
 
     return;
   }
@@ -96,6 +90,7 @@ function boardVisual(arr) {
     if (i === 3) {
       boardStr += '|\n'
     }
+
     if (i === 6) {
       boardStr += '|\n'
     }
@@ -104,6 +99,7 @@ function boardVisual(arr) {
       boardStr += '|  >' + (i + 1) + ' ';
       continue
     }
+
     boardStr += '|  ' + (arr[i]) + '  ';
   }
 
@@ -115,21 +111,25 @@ function boardVisual(arr) {
 
 const { field, move, restart, checkWin, checkDraw, getPlayer } = ticTacToe();
 
+const rl = readline.createInterface({
+  input: process.stdin,
+  output: process.stdout
+});
+
 console.log('Lets play, enter a key, X - first');
 console.log(boardVisual(field));
 
 rl.on('line', input => {
+
   if (input === '') {
     console.log('Empty input');
     console.log('Player', getPlayer(), 'to move');
-
     return;
   }
 
   if (input.toLowerCase() === 'x') {
     console.log('You quitted the game')
     rl.close();
-
     return
   }
 
@@ -137,36 +137,29 @@ rl.on('line', input => {
     restart();
     console.log('Game is restarted \nPlayer X - make a move');
     console.log(boardVisual(field));
-
     return;
   }
 
   const inputToIndex = parseInt(input) - 1;
-
-  if (checkWin()) {
-    console.log(boardVisual(field));
-    console.log('Player', getPlayer(), 'won! Press `R` to restart or `X` to close the game');
-
-    return;
-  }
-  if (checkDraw()) {
-    console.log(boardVisual(field));
-    console.log('It`s a draw! Press `R` to restart or `X` to close the game');
-
-    return;
-  }
 
   try {
     move(inputToIndex);
     console.log(boardVisual(field));
   } catch (err) {
     console.log(`${err.message}`);
-    console.log('Player', getPlayer(), 'to move');
+  }
+
+  if (checkWin()) {
+    console.log('Player', getPlayer(), 'won! Press `R` to restart or `X` to close the game');
+    return;
+  }
+
+  if (checkDraw()) {
+    console.log('It`s a draw! Press `R` to restart or `X` to close the game');
+    return;
   }
 
   console.log('Player', getPlayer(), 'to move');
-
-  rl.prompt();
 });
 
 rl.on('close', () => {
