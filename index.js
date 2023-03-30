@@ -8,10 +8,7 @@ function ticTacToe() {
     if (moveCounter % 2 === 0 || moveCounter === 0) {
       return 'X';
     }
-
-    if (moveCounter % 2 !== 0) {
-      return 'O';
-    }
+    return 'O';
   }
 
   const isValidInput = (value) => {
@@ -23,13 +20,12 @@ function ticTacToe() {
   }
 
   const move = (value) => {
-
     if (isValidInput(value)) {
       throw new Error('Input must be between 1 and 9')
     }
 
     if (emptySell(value)) {
-      throw new Error('Sell is already occupied')
+      throw new Error('Cell is already occupied')
     }
 
     field[value] = getPlayer();
@@ -79,11 +75,14 @@ function ticTacToe() {
     return;
   }
 
-  return { move, restart, checkWin, checkDraw, getPlayer, field };
+  const isGameFinished = () => {
+    return checkDraw() || checkWin();
+  }
+
+  return { move, restart, checkWin, checkDraw, getPlayer, isGameFinished, field };
 }
 
-function boardVisual(arr) {
-
+function stringifyBoard(arr) {
   let boardStr = '';
 
   for (let i = 0; i < arr.length; i++) {
@@ -109,7 +108,7 @@ function boardVisual(arr) {
 }
 
 
-const { field, move, restart, checkWin, checkDraw, getPlayer } = ticTacToe();
+const { field, move, restart, checkWin, checkDraw, getPlayer, isGameFinished } = ticTacToe();
 
 const rl = readline.createInterface({
   input: process.stdin,
@@ -117,10 +116,9 @@ const rl = readline.createInterface({
 });
 
 console.log('Lets play, enter a key, X - first');
-console.log(boardVisual(field));
+console.log(stringifyBoard(field));
 
 rl.on('line', input => {
-
   if (input === '') {
     console.log('Empty input');
     console.log('Player', getPlayer(), 'to move');
@@ -128,7 +126,6 @@ rl.on('line', input => {
   }
 
   if (input.toLowerCase() === 'x') {
-    console.log('You quitted the game')
     rl.close();
     return
   }
@@ -136,7 +133,12 @@ rl.on('line', input => {
   if (input.toLowerCase() === 'r') {
     restart();
     console.log('Game is restarted \nPlayer X - make a move');
-    console.log(boardVisual(field));
+    console.log(stringifyBoard(field));
+    return;
+  }
+
+  if (isGameFinished()) {
+    console.log('Game is finished! Press `R` to restart or `X` to close the game');
     return;
   }
 
@@ -144,7 +146,7 @@ rl.on('line', input => {
 
   try {
     move(inputToIndex);
-    console.log(boardVisual(field));
+    console.log(stringifyBoard(field));
   } catch (err) {
     console.log(`${err.message}`);
   }
@@ -163,5 +165,6 @@ rl.on('line', input => {
 });
 
 rl.on('close', () => {
+  console.log('You quitted the game');
   process.exit(0);
 });
